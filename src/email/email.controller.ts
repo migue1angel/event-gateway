@@ -2,6 +2,7 @@ import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
 import { TokenInjectionEnum } from 'src/shared/enums/token-injection.enum';
+import { SendEmailDto } from './dto/send-email.dto';
 
 @Controller('email')
 export class EmailController {
@@ -11,8 +12,8 @@ export class EmailController {
   ) {}
 
   @Post()
-  async sendEmail(@Body() payload: any) {
-    return this.emailClient.send('sendEmail', payload).pipe(
+  async sendEmail(@Body() sendEmailDto: SendEmailDto) {
+    return this.emailClient.send('sendEmail', sendEmailDto).pipe(
       catchError((error) => {
         console.log(error);
         return error;
