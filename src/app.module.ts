@@ -4,10 +4,10 @@ import { AppService } from './app.service';
 import { EmailModule } from './email/email.module';
 import { AuthModule } from './auth/auth.module';
 import { EventModule } from './event/event.module';
-import { RegisterModule } from './register/register.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
-  imports: [EmailModule, AuthModule, EventModule, RegisterModule],
+  imports: [EmailModule, AuthModule, EventModule, PaymentModule],
   controllers: [AppController],
   providers: [AppService],
 })
