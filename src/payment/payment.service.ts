@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import { UpdateRegisterDto } from './dto/update-register.dto';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class RegisterService {
-  create(createRegisterDto: CreateRegisterDto) {
-    return 'This action adds a new register';
+export class PaymentService {
+  constructor(
+    @Inject('PAYMENT_SERVICE') private readonly client: ClientProxy
+  ) {}
+
+  async create(createRegisterDto: CreateRegisterDto) {
+    console.log('Payment Service sending createPayment message:', createRegisterDto);
+    return firstValueFrom(
+      this.client.send('createPayment', createRegisterDto)
+    );
   }
 
-  findAll() {
-    return `This action returns all register`;
+  async findAll() {
+    console.log('Payment Service sending findAllPayments message');
+    return firstValueFrom(
+      this.client.send('findAllPayments', {})
+    );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} register`;
+  async findOne(id: number) {
+    console.log('Payment Service sending findOnePayment message:', id);
+    return firstValueFrom(
+      this.client.send('findOnePayment', id)
+    );
   }
 
-  update(id: number, updateRegisterDto: UpdateRegisterDto) {
-    return `This action updates a #${id} register`;
+  async update(id: number, updateRegisterDto: UpdateRegisterDto) {
+    console.log('Payment Service sending updatePayment message:', { id, updateRegisterDto });
+    return firstValueFrom(
+      this.client.send('updatePayment', { id, updatePaymentDto: updateRegisterDto })
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} register`;
+  async remove(id: number) {
+    console.log('Payment Service sending removePayment message:', id);
+    return firstValueFrom(
+      this.client.send('removePayment', id)
+    );
   }
 }
