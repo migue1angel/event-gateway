@@ -1,13 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import { UpdateRegisterDto } from './dto/update-register.dto';
 
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {
-    console.log('PaymentController initialized in Gateway');
-  }
+  constructor(private readonly paymentService: PaymentService) {}
 
   @Post()
   create(@Body() createRegisterDto: CreateRegisterDto) {
@@ -28,8 +34,16 @@ export class PaymentController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRegisterDto: UpdateRegisterDto) {
-    console.log('Gateway received PATCH request for id:', id, 'with data:', updateRegisterDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateRegisterDto: UpdateRegisterDto,
+  ) {
+    console.log(
+      'Gateway received PATCH request for id:',
+      id,
+      'with data:',
+      updateRegisterDto,
+    );
     return this.paymentService.update(+id, updateRegisterDto);
   }
 

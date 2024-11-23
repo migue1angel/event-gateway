@@ -1,33 +1,28 @@
 import * as joi from 'joi';
 import 'dotenv/config';
 
+interface EnvsSchema {
+  PORT: number;
+  NAT_SERVERS: string[];
+}
+
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
-    EMAIL_MS_PORT: joi.number().required(),
-    EVENT_MS_PORT: joi.number().required(),
-    AUTH_MS_PORT: joi.number().required(),
-    PAYMENT_MS_PORT: joi.number().required(),
-    EMAIL_MS_HOST: joi.string().required(),
-    EVENT_MS_HOST: joi.string().required(),
-    AUTH_MS_HOST: joi.string().required(),
-    PAYMENT_MS_HOST: joi.string().required(),
+    NAT_SERVERS: joi.array().items(joi.string()).required(),
   })
   .unknown(true);
 
-const { error, value: envVars } = envsSchema.validate(process.env);
+const { error, value } = envsSchema.validate({
+  ...process.env,
+  NAT_SERVERS: process.env.NAT_SERVERS?.split(','),
+});
+
 if (error) {
-  throw new Error(`Config validation errors:${error.message}`);
+  throw new Error(`Config validation error: ${error.message}`);
 }
 
-export const envs = {
-  port: envVars.PORT,
-  EMAIL_MS_PORT: envVars.EMAIL_MS_PORT,
-  EVENT_MS_PORT: envVars.EVENT_MS_PORT,
-  AUTH_MS_PORT: envVars.AUTH_MS_PORT,
-  PAYMENT_MS_PORT: envVars.PAYMENT_MS_PORT,
-  EMAIL_MS_HOST: envVars.EMAIL_MS_HOST,
-  EVENT_MS_HOST: envVars.EVENT_MS_HOST,
-  AUTH_MS_HOST: envVars.AUTH_MS_HOST,
-  PAYMENT_MS_HOST: envVars.PAYMENT_MS_HOST,
+export const envs: EnvsSchema = {
+  PORT: value.PORT,
+  NAT_SERVERS:value.NAT_SERVERS,
 };

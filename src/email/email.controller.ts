@@ -1,19 +1,19 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError } from 'rxjs';
-import { TokenInjectionEnum } from 'src/shared/enums/token-injection.enum';
 import { SendEmailDto } from './dto/send-email.dto';
+import { NATS_SERVICE } from 'src/config/services';
 
 @Controller('email')
 export class EmailController {
   constructor(
-    @Inject(TokenInjectionEnum.EMAIL_SERVICE)
-    private readonly emailClient: ClientProxy,
+    @Inject(NATS_SERVICE)
+    private readonly client: ClientProxy,
   ) {}
-
+ 
   @Post()
   async sendEmail(@Body() sendEmailDto: SendEmailDto) {
-    return this.emailClient.send('sendEmail', sendEmailDto).pipe(
+    return this.client.emit('sendEmail', sendEmailDto).pipe(
       catchError((error) => {
         console.log(error);
         return error;
