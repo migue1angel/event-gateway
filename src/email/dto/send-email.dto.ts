@@ -9,7 +9,7 @@ import {
 export class SendEmailDto {
   @IsArray()
   @IsEmail({}, { each: true })
-  @ArrayNotEmpty()
+  @ArrayNotEmpty({message:'To field should have at least one email'})
   to: string[];
 
   @IsString()
