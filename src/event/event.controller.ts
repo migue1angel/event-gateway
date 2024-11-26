@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { EventService } from './event.service';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
+import { CreateEventDto, UpdateEventDto } from './dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { NATS_SERVICE } from 'src/config/services';
 
 @Controller('event')
 export class EventController {
-  constructor(private readonly eventService: EventService) {}
+  constructor(
+    @Inject(NATS_SERVICE)
+    private readonly client:ClientProxy
+  ) {}
 
   @Post()
   create(@Body() createEventDto: CreateEventDto) {
-    return this.eventService.create(createEventDto);
+    return this.client.send('create_event', createEventDto);
   }
-
+  
   @Get()
   findAll() {
-    return this.eventService.findAll();
+    return this.client.send('find_all_events', {});
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.eventService.findOne(+id);
+    return this.client.send('find_one_event', id);
+
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventService.update(+id, updateEventDto);
+    return this.client.send('update_event', id)
+
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.eventService.remove(+id);
+    return this.client.send('remove_event', id)
   }
 }
