@@ -1,34 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
+import { CreateInformationUserDto } from './dto/information-user/create-information-user.dto';
+import { UpdateInformationUserDto } from './dto/information-user/update-information-user.dto';
+import { NATS_SERVICE } from 'src/config/services';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    @Inject(NATS_SERVICE)
+    private readonly client: ClientProxy,
+  ) {}
 
   @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  create(@Body() createInformationUserDto: CreateInformationUserDto) {
+    return this.client.send(`creado`,createInformationUserDto)
   }
 
   @Get()
   findAll() {
-    return this.authService.findAll();
+    return this.client.send(`encontrado`, {})
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+    return this.client.send(`encontrado`, id)
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+  update(@Param('id') id: string, @Body() updateInformationUserDto: UpdateInformationUserDto) {}
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    return `Eliminado`;
   }
 }
+
