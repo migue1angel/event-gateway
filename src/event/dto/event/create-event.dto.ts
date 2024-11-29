@@ -28,7 +28,7 @@ export class CreateEventDto {
   endDate: Date;
 
   @IsNotEmpty()
-  status: string;
+  state: string;
   
   @IsNotEmpty()
   @IsBoolean()
