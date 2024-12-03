@@ -1,45 +1,83 @@
-import { Body, Controller, Get, Inject, Param, Post, Put, Delete, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, Inject, HttpStatus, HttpCode, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from '../config/services';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('orders')
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class OrdersController {
-  private readonly logger = new Logger(OrdersController.name);
-
-  constructor(
-    @Inject(NATS_SERVICE) private readonly client: ClientProxy
-  ) {}
+  constructor(@Inject(NATS_SERVICE) private client: ClientProxy) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    this.logger.log(`Enviando solicitud de creación de orden: ${JSON.stringify(createOrderDto)}`);
-    return this.client.send('createOrder', createOrderDto);
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createOrderDto: CreateOrderDto) {
+    try {
+      const result = await firstValueFrom(
+        this.client.send('createOrder', createOrderDto)
+      );
+      return {
+        data: {
+          id: result.id,
+          eventId: result.eventId,
+          userId: result.userId,
+          eventName: result.eventName,
+          eventDate: result.eventDate,
+          orderDetails: result.orderDetails,
+        }
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: error.message,
+        error: 'Bad Request'
+      };
+    }
   }
 
   @Get()
-  findAll() {
-    this.logger.log('Solicitando todas las órdenes');
-    return this.client.send('findAllOrders', {});
+  async findAll() {
+    const result = await firstValueFrom(
+      this.client.send('findAllOrders', {})
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: result
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    this.logger.log(`Solicitando orden con ID: ${id}`);
-    return this.client.send('findOneOrder', id);
+  async findOne(@Param('id') id: string) {
+    const result = await firstValueFrom(
+      this.client.send('findOneOrder', id)
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: result
+    };
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    this.logger.log(`Actualizando orden con ID: ${id}`);
-    return this.client.send('updateOrder', { id, ...updateOrderDto });
+  async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+    const result = await firstValueFrom(
+      this.client.send('updateOrder', { id, ...updateOrderDto })
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: result
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    this.logger.log(`Eliminando orden con ID: ${id}`);
-    return this.client.send('removeOrder', id);
+  async remove(@Param('id') id: string) {
+    const result = await firstValueFrom(
+      this.client.send('removeOrder', id)
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: result
+    };
   }
 }
 
