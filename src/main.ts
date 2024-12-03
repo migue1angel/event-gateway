@@ -5,7 +5,9 @@ import { RpcCustomExceptionFilter } from './shared/exceptions/rpc-exception.filt
 
 async function bootstrap() {
   const logger = new Logger('Main Event-Gateway');
+
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

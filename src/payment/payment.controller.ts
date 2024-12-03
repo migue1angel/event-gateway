@@ -6,50 +6,30 @@ import {
   Patch,
   Param,
   Delete,
+  Inject,
 } from '@nestjs/common';
-import { PaymentService } from './payment.service';
-import { CreateRegisterDto } from './dto/create-register.dto';
-import { UpdateRegisterDto } from './dto/update-register.dto';
+import { PaymentSessionDto } from './dto/payment.dto';
+import { NATS_SERVICE } from 'src/config/services';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
-@Controller('payments')
+@Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    @Inject(NATS_SERVICE)
+    private readonly client: ClientProxy,
+  ) {}
 
-  @Post()
-  create(@Body() createRegisterDto: CreateRegisterDto) {
-    console.log('Gateway received POST request:', createRegisterDto);
-    return this.paymentService.create(createRegisterDto);
-  }
-
-  @Get()
-  findAll() {
-    console.log('Gateway received GET all request');
-    return this.paymentService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    console.log('Gateway received GET one request for id:', id);
-    return this.paymentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateRegisterDto: UpdateRegisterDto,
-  ) {
-    console.log(
-      'Gateway received PATCH request for id:',
-      id,
-      'with data:',
-      updateRegisterDto,
+  @Post('create-order')
+  async create(@Body() paymentSessionDto: PaymentSessionDto) {
+    return await firstValueFrom(
+      this.client.send('createOrder', paymentSessionDto),
     );
-    return this.paymentService.update(+id, updateRegisterDto);
   }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    console.log('Gateway received DELETE request for id:', id);
-    return this.paymentService.remove(+id);
+  @Post(':id/capture-order')
+  async capture(@Param('id') id: string) {
+    return await firstValueFrom(
+      this.client.send('captureOrder', id ),
+    );
   }
 }
