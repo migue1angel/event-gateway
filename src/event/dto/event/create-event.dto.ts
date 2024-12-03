@@ -52,5 +52,6 @@ export class CreateEventDto {
 
   @IsNotEmpty()
   @Type(() => CreateTicketTypeDto)
-  ticket_types?: CreateTicketTypeDto[];
+  ticketTypes: CreateTicketTypeDto[];
 }
+ 

@@ -29,22 +29,7 @@ export class EventController {
   ) {}
 
   @Post()
-  // @UseInterceptors(
-  //   FilesInterceptor('images', 3, {
-  //     limits: {
-  //       fileSize: CloudinaryImageConfig.maxFileSize,
-  //     },
-  //     fileFilter: (req, file, callback) => {
-  //       if (!CloudinaryImageConfig.allowedMimeTypes.includes(file.mimetype)) {
-  //         return callback(
-  //           new BadRequestException('File type not allowed'),
-  //           false,
-  //         );
-  //       }
-  //       callback(null, true);
-  //     },
-  //   }),
-  // )
+  // @UseInterceptors(FilesInterceptor('images', 3))
   create(
     // @UploadedFiles(FilesValidationPipe)
     // files: Express.Multer.File[],
