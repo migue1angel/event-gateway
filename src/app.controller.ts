@@ -11,8 +11,12 @@ export class AppController {
     private readonly client: ClientProxy,
   ) {}
 
-  @Get('event-seed')
+  @Get('seed/event')
   eventSeed() {
     return this.client.send('eventSeed', {});
+  }
+  @Get('seed/auth')
+  rolesSeed() {
+    return this.client.send('rolesSeed', {});
   }
 }

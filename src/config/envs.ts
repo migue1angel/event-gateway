@@ -4,12 +4,16 @@ import 'dotenv/config';
 interface EnvsSchema {
   PORT: number;
   NAT_SERVERS: string[];
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_SECRET: string;
 }
 
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
     NAT_SERVERS: joi.array().items(joi.string()).required(),
+    GOOGLE_CLIENT_ID: joi.string().required(),
+    GOOGLE_SECRET: joi.string().required(),
   })
   .unknown(true);
 
@@ -24,5 +28,7 @@ if (error) {
 
 export const envs: EnvsSchema = {
   PORT: value.PORT,
-  NAT_SERVERS:value.NAT_SERVERS,
+  NAT_SERVERS: value.NAT_SERVERS,
+  GOOGLE_CLIENT_ID: value.GOOGLE_CLIENT_ID,
+  GOOGLE_SECRET: value.GOOGLE_SECRET
 };
