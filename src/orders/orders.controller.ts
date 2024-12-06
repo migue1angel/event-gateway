@@ -11,26 +11,31 @@ export class OrdersController {
   constructor(@Inject(NATS_SERVICE) private client: ClientProxy) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createOrderDto: CreateOrderDto) {
     try {
       const result = await firstValueFrom(
         this.client.send('createOrder', createOrderDto)
       );
+
+      // If the microservice returns an error
+      if (result.error) {
+        return {
+          statusCode: result.statusCode || HttpStatus.BAD_REQUEST,
+          message: result.message,
+          error: 'Bad Request'
+        };
+      }
+
+      // Success response
       return {
-        data: {
-          id: result.id,
-          eventId: result.eventId,
-          userId: result.userId,
-          eventName: result.eventName,
-          eventDate: result.eventDate,
-          orderDetails: result.orderDetails,
-        }
+        statusCode: HttpStatus.CREATED,
+        data: result
       };
     } catch (error) {
+      console.error('Gateway Error:', error);
       return {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: error.message,
+        message: error.message || 'Failed to create order',
         error: 'Bad Request'
       };
     }
@@ -38,46 +43,78 @@ export class OrdersController {
 
   @Get()
   async findAll() {
-    const result = await firstValueFrom(
-      this.client.send('findAllOrders', {})
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      data: result
-    };
+    try {
+      const result = await firstValueFrom(
+        this.client.send('findAllOrders', {})
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: result
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to fetch orders',
+        error: 'Internal Server Error'
+      };
+    }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const result = await firstValueFrom(
-      this.client.send('findOneOrder', id)
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      data: result
-    };
+    try {
+      const result = await firstValueFrom(
+        this.client.send('findOneOrder', id)
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: result
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: `Order with ID ${id} not found`,
+        error: 'Not Found'
+      };
+    }
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    const result = await firstValueFrom(
-      this.client.send('updateOrder', { id, ...updateOrderDto })
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      data: result
-    };
+    try {
+      const result = await firstValueFrom(
+        this.client.send('updateOrder', { id, ...updateOrderDto })
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: result
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Failed to update order',
+        error: 'Bad Request'
+      };
+    }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    const result = await firstValueFrom(
-      this.client.send('removeOrder', id)
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      data: result
-    };
+    try {
+      const result = await firstValueFrom(
+        this.client.send('removeOrder', id)
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        data: result
+      };
+    } catch (error) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: `Order with ID ${id} not found`,
+        error: 'Not Found'
+      };
+    }
   }
 }
 
