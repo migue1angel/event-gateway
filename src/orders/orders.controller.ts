@@ -1,4 +1,17 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, Inject, HttpStatus, HttpCode, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Inject,
+  HttpStatus,
+  HttpCode,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from '../config/services';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -8,35 +21,22 @@ import { firstValueFrom } from 'rxjs';
 @Controller('orders')
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class OrdersController {
-  constructor(@Inject(NATS_SERVICE) private client: ClientProxy) {}
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto) {
     try {
       const result = await firstValueFrom(
-        this.client.send('createOrder', createOrderDto)
+        this.client.send('createOrder', createOrderDto),
       );
 
-      // If the microservice returns an error
-      if (result.error) {
-        return {
-          statusCode: result.statusCode || HttpStatus.BAD_REQUEST,
-          message: result.message,
-          error: 'Bad Request'
-        };
-      }
-
-      // Success response
-      return {
-        statusCode: HttpStatus.CREATED,
-        data: result
-      };
+      return result
     } catch (error) {
       console.error('Gateway Error:', error);
       return {
         statusCode: HttpStatus.BAD_REQUEST,
         message: error.message || 'Failed to create order',
-        error: 'Bad Request'
+        error: 'Bad Request',
       };
     }
   }
@@ -45,17 +45,17 @@ export class OrdersController {
   async findAll() {
     try {
       const result = await firstValueFrom(
-        this.client.send('findAllOrders', {})
+        this.client.send('findAllOrders', {}),
       );
       return {
         statusCode: HttpStatus.OK,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Failed to fetch orders',
-        error: 'Internal Server Error'
+        error: 'Internal Server Error',
       };
     }
   }
@@ -63,37 +63,38 @@ export class OrdersController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
-      const result = await firstValueFrom(
-        this.client.send('findOneOrder', id)
-      );
+      const result = await firstValueFrom(this.client.send('findOneOrder', id));
       return {
         statusCode: HttpStatus.OK,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         statusCode: HttpStatus.NOT_FOUND,
         message: `Order with ID ${id} not found`,
-        error: 'Not Found'
+        error: 'Not Found',
       };
     }
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
     try {
       const result = await firstValueFrom(
-        this.client.send('updateOrder', { id, ...updateOrderDto })
+        this.client.send('updateOrder', { id, ...updateOrderDto }),
       );
       return {
         statusCode: HttpStatus.OK,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Failed to update order',
-        error: 'Bad Request'
+        error: 'Bad Request',
       };
     }
   }
@@ -101,20 +102,17 @@ export class OrdersController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {
-      const result = await firstValueFrom(
-        this.client.send('removeOrder', id)
-      );
+      const result = await firstValueFrom(this.client.send('removeOrder', id));
       return {
         statusCode: HttpStatus.OK,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         statusCode: HttpStatus.NOT_FOUND,
         message: `Order with ID ${id} not found`,
-        error: 'Not Found'
+        error: 'Not Found',
       };
     }
   }
 }
-
