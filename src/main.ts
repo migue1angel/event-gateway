@@ -14,7 +14,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  // app.useGlobalFilters(new RpcCustomExceptionFilter());
+  app.useGlobalFilters(new RpcCustomExceptionFilter());
   await app.listen(process.env.PORT);
   logger.log(`Event-Gateway running on port ${process.env.PORT}`);
 }

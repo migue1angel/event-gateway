@@ -7,9 +7,12 @@ import {
   Get,
   UseGuards,
   Res,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { NATS_SERVICE } from 'src/config/services';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateUserDto } from '../dto/user/create-user.dto';
 import { firstValueFrom } from 'rxjs';
 import { LoginDto } from '../dto/user/login.dto';
@@ -25,10 +28,16 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    const response = await firstValueFrom(this.client.send('login', loginDto));
-    return response;
+    try {
+      return await firstValueFrom(
+        this.client.send('login', loginDto),
+      );
+    } catch (err) {
+      console.log(err);  
+      throw new RpcException(err);
+    }
   }
-
+ 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     const response = await firstValueFrom(
