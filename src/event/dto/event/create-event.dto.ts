@@ -32,6 +32,7 @@ export class CreateEventDto {
   
   @IsNotEmpty()
   @IsBoolean()
+  @Type(() => Boolean)
   isPublic: boolean;
   
   @IsNotEmpty()
@@ -45,6 +46,7 @@ export class CreateEventDto {
   address: CreateAddressDto;
 
   @IsBoolean()
+  @Type(() => Boolean)
   hasSponsors: boolean;
 
   @IsOptional()
@@ -53,5 +55,8 @@ export class CreateEventDto {
   @IsNotEmpty()
   @Type(() => CreateTicketTypeDto)
   ticketTypes: CreateTicketTypeDto[];
+
+  @IsOptional()
+  images?: Express.Multer.File[];
 }
  

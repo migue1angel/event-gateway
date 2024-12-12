@@ -11,9 +11,10 @@ import {
   Req,
   UploadedFiles,
   UseInterceptors,
+  UsePipes,
 } from '@nestjs/common';
 import { CreateEventDto, UpdateEventDto } from './dto';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config/services';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { create } from 'domain';
@@ -21,28 +22,45 @@ import { any, string } from 'joi';
 import { CloudinaryImageConfig } from 'src/config/cloudinary-image-config';
 import { FilesValidationPipe } from './pipes/file.pipe';
 import { firstValueFrom } from 'rxjs';
+import { CloudinaryService } from 'src/shared/services/cloudinary.service';
+import { ParseJsonPipe } from './pipes/json.pipe';
 
 @Controller('event')
 export class EventController {
   constructor(
     @Inject(NATS_SERVICE)
     private readonly client: ClientProxy,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Post()
-  // @UseInterceptors(FilesInterceptor('images', 3))
-  create(
-    // @UploadedFiles(FilesValidationPipe)
-    // files: Express.Multer.File[],
-    @Body() createEventDto: CreateEventDto,
+  @UseInterceptors(FilesInterceptor('images', 3))
+  async create(
+    @UploadedFiles(FilesValidationPipe)
+    images: Express.Multer.File[],
+
+    @Body('event', ParseJsonPipe) createEventDto: any,
   ) {
-    return this.client.send('createEvent', { ...createEventDto });
+    const uploadedImages = await Promise.all(
+      images.map(async (image) => {
+        return await this.cloudinaryService.uploadImage(image);
+      }),
+    );
+
+    try {
+      return this.client.send('createEvent', {
+        ...createEventDto,
+        images: uploadedImages,
+      });
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
-  // @Get('validate')
-  // findAll() {
-  //   return this.client.send('find_all_events', {});
-  // }
+  @Get('validate')
+  findAll() {
+    return this.client.send('find_all_events', {});
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
