@@ -25,7 +25,7 @@ import { firstValueFrom } from 'rxjs';
 import { CloudinaryService } from 'src/shared/services/cloudinary.service';
 import { ParseJsonPipe } from './pipes/json.pipe';
 
-@Controller('event')
+@Controller('events')
 export class EventController {
   constructor(
     @Inject(NATS_SERVICE)
@@ -57,9 +57,9 @@ export class EventController {
     }
   }
 
-  @Get('validate')
+  @Get()
   findAll() {
-    return this.client.send('find_all_events', {});
+    return this.client.send('findAllEvents', {});
   }
 
   @Get(':id')
