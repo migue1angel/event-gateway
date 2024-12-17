@@ -23,4 +23,8 @@ import { NATS_SERVICE } from 'src/config/services';
     ]),
   ],
 })
-export class NatsModule {}
+export class NatsModule {}   
+
+
+
+

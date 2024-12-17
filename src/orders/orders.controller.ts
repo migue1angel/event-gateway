@@ -25,6 +25,7 @@ export class OrdersController {
 
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto) {
+    
     try {
       const result = await firstValueFrom(
         this.client.send('createOrder', createOrderDto),

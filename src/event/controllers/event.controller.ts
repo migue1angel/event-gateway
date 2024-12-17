@@ -56,6 +56,11 @@ export class EventController {
   findAll() {
     return this.client.send('findAllEvents', {});
   }
+  
+  @Get('organizer/:id')
+  findByOrganizer(@Param('id') id: string) {
+    return this.client.send('findEventsByOrganizer', id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
