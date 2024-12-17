@@ -8,22 +8,17 @@ import {
   Delete,
   Inject,
   BadRequestException,
-  Req,
   UploadedFiles,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
-import { CreateEventDto, UpdateEventDto } from './dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { NATS_SERVICE } from 'src/config/services';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { create } from 'domain';
-import { any, string } from 'joi';
-import { CloudinaryImageConfig } from 'src/config/cloudinary-image-config';
-import { FilesValidationPipe } from './pipes/file.pipe';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { firstValueFrom } from 'rxjs';
+import { NATS_SERVICE } from 'src/config/services';
 import { CloudinaryService } from 'src/shared/services/cloudinary.service';
-import { ParseJsonPipe } from './pipes/json.pipe';
+import { UpdateEventDto } from '../dto';
+import { FilesValidationPipe } from '../pipes/file.pipe';
+import { ParseJsonPipe } from '../pipes/json.pipe';
 
 @Controller('events')
 export class EventController {

@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { EventController } from './event.controller';
 import { NatsModule } from 'src/transports/nats.module';
 import { CloudinaryService } from 'src/shared/services/cloudinary.service';
-import { ParseJsonPipe } from './pipes/json.pipe';
+import { EventController } from './controllers/event.controller';
 
 @Module({
   controllers: [EventController],
