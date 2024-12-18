@@ -12,7 +12,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { NATS_SERVICE } from '../config/services';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -25,13 +25,12 @@ export class OrdersController {
 
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto) {
-    
     try {
       const result = await firstValueFrom(
         this.client.send('createOrder', createOrderDto),
       );
 
-      return result
+      return result;
     } catch (error) {
       console.error('Gateway Error:', error);
       return {
@@ -48,16 +47,26 @@ export class OrdersController {
       const result = await firstValueFrom(
         this.client.send('findAllOrders', {}),
       );
-      return {
-        statusCode: HttpStatus.OK,
-        data: result,
-      };
+      return result;
     } catch (error) {
       return {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Failed to fetch orders',
         error: 'Internal Server Error',
       };
+    }
+  }
+
+  @Get('user/:id')
+  async findByUser(@Param('id') id: string) {
+    try {
+      const result = await firstValueFrom(
+        this.client.send('findOrdersByUser', id),
+      );
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw new RpcException(error);
     }
   }
 
