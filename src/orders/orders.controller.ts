@@ -11,12 +11,14 @@ import {
   HttpCode,
   UsePipes,
   ValidationPipe,
+  Res,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { NATS_SERVICE } from '../config/services';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { firstValueFrom } from 'rxjs';
+import { Response } from 'express';
 
 @Controller('orders')
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -84,6 +86,27 @@ export class OrdersController {
         message: `Order with ID ${id} not found`,
         error: 'Not Found',
       };
+    }
+  }
+
+  @Get('generate-tickets/:id')
+  async generateTickets(
+    @Param('id') id: string, 
+    @Res() res: Response
+  ) {
+    try {
+      const result = await firstValueFrom(
+        this.client.send('generateTickets', id),
+      );
+  
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'inline; filename=ticket.pdf'
+      });
+      
+      res.send(Buffer.from(result));
+    } catch (error) {
+      throw new RpcException(error);
     }
   }
 
